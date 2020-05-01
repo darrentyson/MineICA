@@ -564,7 +564,7 @@ runAn <- function(params,
 runEnrich <- function(icaSet, params, dbs = c("KEGG","GO"), ontos = c("BP","CC","MF"), cond = TRUE, hgCutoff = params["pvalCutoff"]) {
 
 
-    entrezgene <- hgnc_symbol <- NULL
+    entrezgene_id <- hgnc_symbol <- NULL
 
     
     mart <- mart(icaSet)
@@ -621,21 +621,21 @@ runEnrich <- function(icaSet, params, dbs = c("KEGG","GO"), ontos = c("BP","CC",
             stop(paste(typeID(icaSet), "is not available in listFilters(mart)."))
 
         message(paste("BiomaRt is used to find the correspondence between ", typeID(icaSet)["geneID_biomart"], ", Symbols, and EntrezGene IDs.", sep = ""))
-        universe1 <- getBM(values = geneNames(icaSet), filters = typeID(icaSet)["geneID_biomart"], attributes = c(typeID(icaSet)["geneID_biomart"],"entrezgene", "hgnc_symbol"), mart = mart)
-        sumNA <- sum(is.na(universe1$entrezgene))
+        universe1 <- getBM(values = geneNames(icaSet), filters = typeID(icaSet)["geneID_biomart"], attributes = c(typeID(icaSet)["geneID_biomart"],"entrezgene_id", "hgnc_symbol"), mart = mart)
+        sumNA <- sum(is.na(universe1$entrezgene_id))
         if (sumNA>0)
             message(paste("According to biomaRt, ", sumNA, " gene names have no EntrezGene ID across the ", length(featureNames(icaSet)), " available.", sep = ""))
         sumNA <- sum(is.na(universe1$hgnc_symbol))
         if (sumNA>0)
             message(paste("According to biomaRt, ", sumNA, " gene names have no Symbol ID across the ", length(featureNames(icaSet)), " available.", sep = ""))
         
-        universe2 <- subset(universe1, !is.na(entrezgene))
-        universe <- as.character(universe2$entrezgene)
+        universe2 <- subset(universe1, !is.na(entrezgene_id))
+        universe <- as.character(universe2$entrezgene_id)
         names(universe) <- universe2[,1]
         universe2 <- subset(universe2, !is.na(hgnc_symbol))
         universe2 <- subset(universe2, hgnc_symbol != "")
         entrez2hugo <- as.character(universe2$hgnc_symbol)
-        names(entrez2hugo) <- as.character(universe2$entrezgene)
+        names(entrez2hugo) <- as.character(universe2$entrezgene_id)
       
 
         
@@ -717,7 +717,7 @@ runEnrich <- function(icaSet, params, dbs = c("KEGG","GO"), ontos = c("BP","CC",
                 
                 }
 
-            mergeGostatsResults(resPath = params["resPath"], GOstatsPath = "GOstatsEnrichAnalysis", rdata="hgres", cutoffs = params["selCutoff"], hgCutoff = hgCutoff, cond = cond, pathGenes =  genesPath(params))
+            MineICA:::mergeGostatsResults(resPath = params["resPath"], GOstatsPath = "GOstatsEnrichAnalysis", rdata="hgres", cutoffs = params["selCutoff"], hgCutoff = hgCutoff, cond = cond, pathGenes =  genesPath(params))
 
     return(resHg)
 
